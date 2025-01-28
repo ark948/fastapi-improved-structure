@@ -33,7 +33,7 @@ app.include_router(user_router, prefix='/user', tags=['user'])
 @app.get('')
 @app.get('/')
 def root():
-    return "fastapi + poetry + sqlalchemy + postgresql + redis + celery + docker"
+    return "fastapi + poetry + sqlalchemy + postgresql + alembic + redis + celery + docker"
 
 
 
