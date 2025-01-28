@@ -1,0 +1,22 @@
+Poetry
+FastAPI
+SqlAlchemy
+Redis
+Celery
+Gunicorn
+NGinx
+Docker
+
+
+
+> alembic init -t async migrations
+> alembic revision --autogenerate -m "User Model"
+> alembic upgrade head
+
+
+
+- trying to utilize: pytest-postgresql plugin
+> pip install pytest-postgresql
+
+
+> psql -p 5434 -U arman -d armandb
