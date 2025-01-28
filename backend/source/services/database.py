@@ -15,9 +15,11 @@ class DatabaseSessionManager:
         self._engine: AsyncEngine | None = None
         self._sessionmaker: async_sessionmaker | None = None
 
+
     def init(self, host: str):
         self._engine = create_async_engine(host)
         self._sessionmaker = async_sessionmaker(autocommit=False, bind=self._engine)
+
 
     async def close(self):
         if self._engine is None:
@@ -39,6 +41,7 @@ class DatabaseSessionManager:
                 await connection.rollback()
                 raise
 
+
     @contextlib.asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
         if self._sessionmaker is None:
@@ -53,9 +56,11 @@ class DatabaseSessionManager:
         finally:
             await session.close()
 
+
     # Used for testing
     async def create_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.create_all)
+
 
     async def drop_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.drop_all)

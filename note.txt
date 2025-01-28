@@ -1,6 +1,7 @@
 Poetry
 FastAPI
 SqlAlchemy
+Alembic
 Redis
 Celery
 Gunicorn
