@@ -17,7 +17,7 @@ Docker
 
 
 - trying to utilize: pytest-postgresql plugin
-> pip install pytest-postgresql
+> pip add <package name>
 
 
 > psql -p 5434 -U arman -d armandb

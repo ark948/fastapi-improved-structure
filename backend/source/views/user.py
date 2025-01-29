@@ -4,38 +4,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from source.services.database import get_db
 from source.models import User as UserModel
-
-router = APIRouter(prefix="/user", tags=["user"])
-
-
-class UserSchemaBase(BaseModel):
-    email: str | None = None
-    full_name: str | None = None
-
-class UserSchemaCreate(UserSchemaBase):
-    pass
+from source.schemas import user as user_schemas
+from source.crud import user as user_crud
 
 
-class UserSchema(UserSchemaBase):
-    id: str
-
-    class Config:
-        form_attributes = True
+router = APIRouter()
 
 
-@router.get("/get-user", response_model=UserSchema)
+
+@router.get("/get-user", response_model=user_schemas.UserBaseModel)
 async def get_user(id: str, db: AsyncSession = Depends(get_db)):
     user = await UserModel.get(db, id)
     return user
 
 
-@router.get("/get-users", response_model=list[UserSchema])
+@router.get("/get-users", response_model=list[user_schemas.UserBaseModel])
 async def get_users(db: AsyncSession = Depends(get_db)):
     users = await UserModel.get_all(db)
     return users
 
 
-@router.post("/create-user", response_model=UserSchema)
-async def create_user(user: UserSchemaCreate, db: AsyncSession = Depends(get_db)):
-    user = await UserModel.create(db, **user.dict())
+@router.post("/create-user", response_model=user_schemas.UserBaseModel)
+async def create_user(data: user_schemas.UserCreateModel, db: AsyncSession = Depends(get_db)):
+    # user = await UserModel.create(db, **user.dict()) # if not using this, id won't be created
+    user = await user_crud.create_user_crud(data, db)
     return user

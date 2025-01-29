@@ -13,7 +13,7 @@ class Status(Enum):
 
 
 class UserBaseModel(BaseModel):
-    id: int
+    id: str
     email: EmailStr
     username: str
     full_name: Optional[str] = Field(
@@ -34,4 +34,4 @@ class UserCreateModel(BaseModel):
     email: EmailStr
     password: str
     password2: str
-    full_name: Optional[str] = None
+    full_name: str
