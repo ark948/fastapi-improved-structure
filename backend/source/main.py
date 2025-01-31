@@ -9,11 +9,11 @@ from source.services.database import sessionmanager
 async def lifespan(app: FastAPI, init_db: bool = True):
     if init_db:
         sessionmanager.init(settings.DB_URL)
-    print("---> [SERVER STARTED] <---")
+    print("\t---> [SERVER STARTED] <---")
     yield
     if sessionmanager._engine is not None:
         await sessionmanager.close()
-    print("---> [SERVER SHUTDOWN] <---")
+    print("\t---> [SERVER SHUTDOWN] <---")
 
 
 app = FastAPI(
@@ -40,3 +40,8 @@ def test():
 @app.get('/read-env')
 def read_env():
     return settings.SECRET_KEY
+
+
+@app.get('/health')
+def health_check():
+    return {'message': "سلام"}

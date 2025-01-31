@@ -15,6 +15,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
 
+
     @classmethod
     async def create(cls, db: AsyncSession, id=None, **kwargs):
         if not id:
@@ -26,6 +27,7 @@ class User(Base):
         await db.refresh(transaction)
         return transaction
 
+
     @classmethod
     async def get(cls, db: AsyncSession, id: str):
         try:
@@ -33,6 +35,7 @@ class User(Base):
         except NoResultFound:
             return None
         return transaction
+
 
     @classmethod
     async def get_all(cls, db: AsyncSession):

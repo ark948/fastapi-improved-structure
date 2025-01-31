@@ -10,6 +10,7 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
+
 class DatabaseSessionManager:
     def __init__(self):
         self._engine: AsyncEngine | None = None

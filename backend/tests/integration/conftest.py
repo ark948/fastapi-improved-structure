@@ -1,72 +1,49 @@
+from typing import AsyncGenerator
+from uuid import UUID, uuid4
 import pytest
-import asyncio
-from contextlib import ExitStack
-from fastapi.testclient import TestClient
-from pytest_postgresql import factories
-from pytest_postgresql.janitor import DatabaseJanitor
-from sqlalchemy.testing.entities import ComparableEntity
+from httpx import AsyncClient
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_engine, AsyncTransaction, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy_utils import create_database, database_exists, drop_database
+from sqlalchemy.util import greenlet_spawn
+import pytest_asyncio
 
-from source import init_app
+
+
+from source.services.database import get_db, Base
+from source.main import app
 from source.models import User
-from source.services.database import get_db, sessionmanager
 
 
-@pytest.fixture(autouse=True)
-def app():
-    with ExitStack():
-        yield init_app(init_db=False)
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
 
-
-
-@pytest.fixture
-def client(app):
-    with TestClient(app) as c:
-        yield c
-
-
-
-test_db = factories.postgresql_proc(port=5434, dbname="test_db")
 
 
 
 @pytest.fixture(scope="session")
-def event_loop(request):
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+async def connection( anyio_backend ) -> AsyncGenerator[AsyncConnection, None]:
+    engine = create_async_engine("postgresql+asyncpg://arman:123@localhost:5434/test02")
+    async with engine.connect() as connection:
+        yield connection
 
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def connection_test(test_db, event_loop):
-    pg_host = test_db.host
-    pg_port = test_db.port
-    pg_user = test_db.user
-    pg_db = test_db.dbname
-    pg_password = test_db.password
-
-    with DatabaseJanitor(
-        pg_user, pg_host, pg_port, pg_db, test_db.version, pg_password
-    ):
-        connection_str = f"postgresql+psycopg://{pg_user}:@{pg_host}:{pg_port}/{pg_db}"
-        sessionmanager.init(connection_str)
-        yield
-        await sessionmanager.close()
+@pytest.fixture()
+async def transaction( connection: AsyncConnection ) -> AsyncGenerator[AsyncTransaction, None]:
+    async with connection.begin() as transaction:
+        yield transaction
 
 
+@pytest.fixture()
+async def session( connection: AsyncConnection, transaction: AsyncTransaction ) -> AsyncGenerator[AsyncSession, None]:
+    async_session = AsyncSession(
+        bind=connection,
+        join_transaction_mode="create_savepoint",
+    )
 
-@pytest.fixture(scope="function", autouse=True)
-async def create_tables(connection_test):
-    async with sessionmanager.connect() as connection:
-        await sessionmanager.drop_all(connection)
-        await sessionmanager.create_all(connection)
+    yield async_session
 
-
-
-@pytest.fixture(scope="function", autouse=True)
-async def session_override(app, connection_test):
-    async def get_db_override():
-        async with sessionmanager.session() as session:
-            yield session
-
-    app.dependency_overrides[get_db] = get_db_override
+    await transaction.rollback()
