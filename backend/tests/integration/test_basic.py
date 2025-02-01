@@ -48,7 +48,7 @@ async def test_create_user_02( session: AsyncSession ):
 
 
 
-async def test_api_create_profile(client: AsyncClient):
+async def test_api_create_user(client: AsyncClient):
     async with client as ac:
         response = await ac.post(
             "/user/create-user",
@@ -74,3 +74,11 @@ async def test_api_create_profile(client: AsyncClient):
         assert response.status_code == 200
         assert response.json()["id"] == created_user_id
         assert response.json()["username"] == 'test01'
+
+
+
+async def test_client_rollbacks( client: AsyncClient ):
+    async with client as ac:
+        resposne = await ac.get("/user/get-users")
+        assert resposne.status_code == 200
+        assert len(resposne.json()) == 0
