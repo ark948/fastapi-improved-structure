@@ -43,7 +43,5 @@ async def session( connection: AsyncConnection, transaction: AsyncTransaction ) 
         bind=connection,
         join_transaction_mode="create_savepoint",
     )
-
     yield async_session
-
     await transaction.rollback()
