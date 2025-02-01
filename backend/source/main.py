@@ -25,6 +25,10 @@ app = FastAPI(
 from source.views.user import router as user_router
 app.include_router(user_router, prefix='/user', tags=['user'])
 
+from source.services.authentication import router as auth_router
+app.include_router(auth_router, prefix='/auth', tags=['auth'])
+
+
 
 @app.get('')
 @app.get('/')
