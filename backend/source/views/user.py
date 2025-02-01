@@ -24,7 +24,7 @@ async def get_users(db: AsyncSession = Depends(get_db)):
     return users
 
 
-@router.post("/create-user", response_model=user_schemas.UserBaseModel)
+@router.post("/create-user", response_model=user_schemas.UserBaseModel, status_code=201)
 async def create_user(data: user_schemas.UserCreateModel, db: AsyncSession = Depends(get_db)):
     # user = await UserModel.create(db, **user.dict()) # if not using this, id won't be created
     user = await user_crud.create_user_crud(data, db)
