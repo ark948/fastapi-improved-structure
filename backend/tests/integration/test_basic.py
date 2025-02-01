@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from httpx import AsyncClient
 
 
 from source.models import User
@@ -43,3 +44,33 @@ async def test_create_user_02( session: AsyncSession ):
     await session.commit()
     current_users = (await session.execute(select(User))).scalars().all()
     assert len(current_users) == 1
+
+
+
+
+async def test_api_create_profile(client: AsyncClient):
+    async with client as ac:
+        response = await ac.post(
+            "/user/create-user",
+            json={
+                'username': "test01",
+                'email': "test01@email.com",
+                'password': "some123",
+                'password2': "some123",
+                'full_name': "Test User"
+            },
+        )
+        created_user_id = response.json()["id"]
+
+        response = await ac.get(
+            "/user/get-users",
+        )
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        
+        response = await ac.get(
+            f"/user/get-user?id={created_user_id}",
+        )
+        assert response.status_code == 200
+        assert response.json()["id"] == created_user_id
+        assert response.json()["username"] == 'test01'
