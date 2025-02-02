@@ -21,3 +21,11 @@ Docker
 
 
 > psql -p 5434 -U arman -d armandb
+
+
+
+notable features to implement:
+user account verification using otp and redis
+secret key rotation
+rate-limiting
+role-based authorization

@@ -27,6 +27,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter()
 pwd_context = CryptContext(schemes=['pbkdf2_sha256'], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 
 
@@ -40,7 +41,6 @@ class TokenData(BaseModel):
 
 
 
-# update from sqlmodel to sqlalchemys
 async def get_user_from_email(email: str, session: SessionDep) -> User:
     user = (await session.execute(
         select(User).where(User.email == email)
@@ -51,7 +51,6 @@ async def get_user_from_email(email: str, session: SessionDep) -> User:
         detail=f"User with {email} was not found.")
     return user
     
-
 
 
 def verify_password(plain_password, hashed_password) -> bool:
@@ -80,7 +79,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: SessionDep):
+async def get_current_user(token: TokenDep, session: SessionDep):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
