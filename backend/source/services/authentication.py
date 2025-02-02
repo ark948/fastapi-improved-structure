@@ -27,7 +27,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter()
 pwd_context = CryptContext(schemes=['pbkdf2_sha256'], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-TokenDep = Annotated[str, Depends(oauth2_scheme)]
+
 
 
 
@@ -79,7 +79,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 
-async def get_current_user(token: TokenDep, session: SessionDep):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: SessionDep):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -93,7 +93,7 @@ async def get_current_user(token: TokenDep, session: SessionDep):
         token_data = TokenData(email=email)
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(email=token_data.email, session=session)
+    user = await get_user(email=token_data.email, session=session)
     if user is None:
         raise credentials_exception
     return user
@@ -131,3 +131,4 @@ async def login_for_access_token(
 
 
 AuthDep = Annotated[User, Depends(get_current_user)]
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
