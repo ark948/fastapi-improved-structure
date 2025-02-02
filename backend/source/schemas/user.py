@@ -24,6 +24,8 @@ class UserBaseModel(BaseModel):
         },
     )
 
+    is_active: bool
+
     model_config = ConfigDict(
         from_attributes=True
     )
@@ -34,4 +36,4 @@ class UserCreateModel(BaseModel):
     email: EmailStr
     password: str
     password2: str
-    full_name: str
+    full_name: Optional[str] = None

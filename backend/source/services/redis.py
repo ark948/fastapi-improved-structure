@@ -22,11 +22,11 @@ USER_VERIFICATION_EXPIRY = 600
 
 
 
-async def redis_logger(func):
-    async def wrapper(*args, **kwargs):
-        print("\nREDIS TASK STARTED.")
-        result = await func(*args, **kwargs)
-        print("\nREDIS TASK ENDED.")
+def redis_logger(func):
+    def wrapper(*args, **kwargs):
+        print("\n-> REDIS task started.")
+        result = func(*args, **kwargs)
+        print("\n-> REDIS task ended.")
         return result
     return wrapper
 
@@ -34,9 +34,11 @@ async def redis_logger(func):
 
 
 @redis_logger
-async def submit_otp_for_user(user_id: str, otp: int, redis_client: async_redis.Redis) -> bool:
+async def submit_otp_for_user(otp: int, user_id: str, redis_client: async_redis.Redis) -> bool:
     try:
-        await redis_client.set(name=str(otp), value=user_id, ex=USER_VERIFICATION_EXPIRY)
+        result = await redis_client.set(name=otp, value=user_id, ex=USER_VERIFICATION_EXPIRY)
+        print(f"\n\n result {result}")
+        print("\n--> REDIS task successful.")
     except Exception as error:
         print("\nRedis TASK FAILED. --> ", str(error))
         return False
@@ -46,10 +48,11 @@ async def submit_otp_for_user(user_id: str, otp: int, redis_client: async_redis.
 
 
 @redis_logger
-async def verify_otp_for_user(user_id_input: str, otp_input: int, redis_client: async_redis.Redis) -> bool:
+async def verify_otp_for_user(otp_input: str, user_id_input: str, redis_client: async_redis.Redis) -> bool:
     try:
         user_id = await redis_client.get(otp_input)
-        if user_id == user_id_input:
+        if user_id.decode("utf-8") == user_id_input:
+            print("\n--> REDIS task successful.")
             return True
     except Exception as error:
         print("\nRedis TASK FAILED. --> ", str(error))

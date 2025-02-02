@@ -29,3 +29,9 @@ user account verification using otp and redis
 secret key rotation
 rate-limiting
 role-based authorization
+
+
+- to run redis docker image on port 6379:
+docker run -p 6379:6379 -it redis/redis-stack
+
+This will run redis/redis-stack image, port 6379 will be exposed, and in interactive mode
