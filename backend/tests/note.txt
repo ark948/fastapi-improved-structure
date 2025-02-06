@@ -1,3 +1,3 @@
 v1 -> fully async, but can't make it work again.
 v2 -> works, async code can be used inside tests, but tests run one by one (not fully async)
-v3 -> fully async, promising signs, (although both database and table remain after test, fortunately users table is empty)
+v3 -> fully async, promising signs, (although both database and table remain after test, fortunately users table is empty) 4 passed in 0.32s

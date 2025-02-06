@@ -30,6 +30,17 @@ def anyio_backend():
     return "asyncio"
 
 
+# database existed
+# table got created
+
+# attempting to remvoe both, see what happens,
+# starting with table... result: table users gets created.
+
+# now attempting to remove database:
+# result: database 'test02' does not exist
+# attempting to create databse and try again...
+# result: OK, tests pass
+
 
 
 @pytest.fixture(scope="session")
