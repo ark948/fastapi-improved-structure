@@ -41,14 +41,3 @@ class User(Base):
     @classmethod
     async def get_all(cls, db: AsyncSession):
         return (await db.execute(select(cls))).scalars().all()
-    
-
-    # this is not working
-    @property
-    def _dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-            'username': self.username,
-            'full_name': self.full_name
-        }
