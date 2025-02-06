@@ -59,10 +59,11 @@ class DatabaseSessionManager:
 
 
     # Used for testing
+    @classmethod
     async def create_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.create_all)
 
-
+    @classmethod
     async def drop_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.drop_all)
 
