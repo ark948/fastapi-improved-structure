@@ -41,6 +41,8 @@ def test():
     return {"message": "test successful"}
 
 
+# This is just to test if env file was properly loaded.
+# DELETE THIS IN PRODUCTION
 @app.get('/read-env')
 def read_env():
     return settings.SECRET_KEY

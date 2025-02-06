@@ -63,7 +63,7 @@ def anyio_backend():
 async def connection(anyio_backend) -> AsyncGenerator[AsyncConnection, None]:
     def _create_db():
         result = database_exists(engine.url)
-        print("\n", result, "\n")
+        # print("\n", result, "\n")
         return result
 
     async def init_models():

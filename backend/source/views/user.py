@@ -18,11 +18,25 @@ router = APIRouter()
 
 
 
-@router.get("/get-user", response_model=user_schemas.UserBaseModel)
-async def get_user(id: str, db: AsyncSession = Depends(get_db)):
-    user = await User.get(db, id)
-    return user
+@router.get('/test', response_model=str, status_code=200)
+async def test():
+    return 'ok'
 
+
+
+@router.get("/get-user", response_model=user_schemas.UserBaseModel | None)
+async def get_user(id: str, db: AsyncSession = Depends(get_db)):
+    try:
+        user = await User.get(db, id)
+    except Exception as error:
+        raise HTTPException(
+            status_code=500, detail=f"There was a problem. {str(error)}"
+        )
+    if user:
+        return user
+    raise HTTPException(
+        status_code=404, detail="User not found."
+    )
 
 @router.get("/get-users", response_model=list[user_schemas.UserBaseModel])
 async def get_users(db: AsyncSession = Depends(get_db)):
