@@ -46,19 +46,32 @@ def anyio_backend():
 
 # Update: got database_exists to return True, and tests pass
 
+# attempting to deliberately drop database using drop_database to see if error is raised
+# test was success error was raised, but also some more advanced errors,
+# such as 'connection is closed'
+# now attempting to create database, by using create_database, also init_models needs to be moved after this process
+# ERROR, database 'test02' does not exist. attempting to move create_database to its own function
+# not working, tried commenting out the check_db_exists call
+# result: database GOT created and tests pass, maybe the problem is the order of execution
+# attempting to move create_database back to check_db_exists,
+# not working
+# summary so far, create_database not working
+
+
 
 @pytest.fixture(scope="session")
 async def connection(anyio_backend) -> AsyncGenerator[AsyncConnection, None]:
-    def check_db_exists():
-        result = database_exists("postgresql+asyncpg://arman:123@localhost:5434/test02")
+    def _create_db():
+        result = database_exists(engine.url)
+        print("\n", result, "\n")
         return result
+
     async def init_models():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
+    await greenlet_spawn(_create_db)
     await init_models()
-    result = await greenlet_spawn(check_db_exists)
-    print("\n\n", result, "\n\n")
     async with engine.connect() as connection:
         yield connection
 
