@@ -16,6 +16,8 @@ import random
 # if user id is as same is the current user, user will be activated
 
 
+# ONLY log errors or if something failed
+
 
 
 USER_VERIFICATION_EXPIRY = 600
@@ -24,9 +26,8 @@ USER_VERIFICATION_EXPIRY = 600
 
 def redis_logger(func):
     def wrapper(*args, **kwargs):
-        print("\n-> REDIS task started.")
+        print("-> Redis task.")
         result = func(*args, **kwargs)
-        print("\n-> REDIS task ended.")
         return result
     return wrapper
 
@@ -36,9 +37,7 @@ def redis_logger(func):
 @redis_logger
 async def submit_otp_for_user(otp: int, user_id: str, redis_client: async_redis.Redis) -> bool:
     try:
-        result = await redis_client.set(name=otp, value=user_id, ex=USER_VERIFICATION_EXPIRY)
-        print(f"\n\n result {result}")
-        print("\n--> REDIS task successful.")
+        await redis_client.set(name=otp, value=user_id, ex=USER_VERIFICATION_EXPIRY)
     except Exception as error:
         print("\nRedis TASK FAILED. --> ", str(error))
         return False
@@ -52,7 +51,6 @@ async def verify_otp_for_user(otp_input: str, user_id_input: str, redis_client: 
     try:
         user_id = await redis_client.get(otp_input)
         if user_id.decode("utf-8") == user_id_input:
-            print("\n--> REDIS task successful.")
             return True
     except Exception as error:
         print("\nRedis TASK FAILED. --> ", str(error))

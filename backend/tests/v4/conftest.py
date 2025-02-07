@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, AsyncIterator
 from uuid import UUID, uuid4
 
 import pytest
@@ -8,11 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy_utils import create_database, database_exists, drop_database
 from sqlalchemy.util import greenlet_spawn
+import fakeredis
+from redis import asyncio as async_redis
 
 
 # Importing fastapi.Depends that is used to retrieve SQLAlchemy's session
 from source.services.database import Base
 from source.services.database import get_db
+from source.services.redis import get_redis
 from source.models import User
 # Importing main FastAPI instance
 from source.main import app
@@ -101,14 +104,18 @@ async def session(
 
 
 
+@pytest.fixture(scope="function")
+async def redis_client() -> AsyncIterator[async_redis.Redis]:
+    async with fakeredis.FakeAsyncRedis() as client:
+        yield client
+
+
 # Use this fixture to get HTTPX's client to test API.
 # All changes that occur in a test function are rolled back
 # after function exits, even if session.commit() is called
 # in FastAPI's application endpoints
 @pytest.fixture()
-async def client(
-    connection: AsyncConnection, transaction: AsyncTransaction
-) -> AsyncGenerator[AsyncClient, None]:
+async def client( connection: AsyncConnection, transaction: AsyncTransaction, redis_client: async_redis.Redis ) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
         async_session = AsyncSession(
             bind=connection,
@@ -116,14 +123,16 @@ async def client(
         )
         async with async_session:
             yield async_session
+
+    async def override_get_redis() -> AsyncGenerator[async_redis.Redis, None]:
+        yield redis_client
     
     # Here you have to override the dependency that is used in FastAPI's
     # endpoints to get SQLAlchemy's AsyncSession. In my case, it is
     # get_async_session
     app.dependency_overrides[get_db] = override_get_async_session
-    yield AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    )
+    app.dependency_overrides[get_redis] = override_get_redis
+    yield AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
     del app.dependency_overrides[get_db]
 
     await transaction.rollback()

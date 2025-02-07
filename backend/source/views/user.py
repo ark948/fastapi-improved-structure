@@ -57,11 +57,15 @@ async def profile(current_user: AuthDep):
 async def request_verification(current_user: AuthDep, r: RedisDep):
     otp = utils.generate_otp()
     result = await submit_otp_for_user(otp=otp, user_id=current_user.id, redis_client=r)
-    return {
-        "Verification Code": otp,
-        "message": "Please use this code to verify your account, it will be valid for 10 minutes.",
-        "link": "http://127.0.0.1:8000/auth/verify-user"
-    }
+    if result:
+        return {
+            "Verification Code": otp,
+            "message": "Please use this code to verify your account, it will be valid for 10 minutes.",
+            "link": "http://127.0.0.1:8000/auth/verify-user"
+        }
+    raise HTTPException(
+        status_code=500, detail="Sorry, there was a problem on our end. Please try again later."
+    )
 
 
 
@@ -72,6 +76,6 @@ async def verify_user(otp: Annotated[str, Body(embed=True)], current_user: AuthD
         result = await user_crud.activate_user_crud(current_user, db)
         if result:
             return {
-                "result": "True",
+                "result": True,
                 "message": "Thank you."
             }
