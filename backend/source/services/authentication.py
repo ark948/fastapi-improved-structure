@@ -47,8 +47,9 @@ async def get_user_from_email(email: str, session: SessionDep) -> User:
     )).scalar()
     if not user:
         raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, 
-        detail=f"User with {email} was not found.")
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
     return user
     
 
@@ -112,10 +113,7 @@ async def authenticate_user(email: str, password: str, session: SessionDep):
 
 # form-data requires --> pip install python-multipart
 @router.post("/login", status_code=status.HTTP_200_OK)
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
-    session: SessionDep
-    ) -> Token:
+async def login_for_access_token( form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: SessionDep ) -> Token:
     user = await authenticate_user(email=form_data.username, password=form_data.password, session=session)
     if not user:
         raise HTTPException(

@@ -110,3 +110,70 @@ async def test_user_views_register_missing_email(client: AsyncClient):
 
         # 422 for unprocessable entity (pydantic validation error)
         assert response.status_code == 422
+
+async def test_user_profile(client: AsyncClient):
+    async with client as ac:
+        response = await ac.post(
+            "/user/register",
+            json={'username': "test01",
+                'email': "test01@email.com",
+                'password': "some123",
+                'password2': "some123",
+                'full_name': "Test User"})
+
+        assert response.status_code == 201
+
+        response = await ac.post(
+            url='/auth/login',
+            data={
+                "username": "test01@email.com",
+                "password": "some123"
+            }
+        )
+
+        assert response.status_code == 200
+        login_data = response.json()
+        
+        response = await ac.get(
+            url='/user/profile',
+            headers={
+                "Authorization": f"Bearer {login_data['access_token']}"
+            }
+        )
+
+        assert response.status_code == 200
+
+
+        
+async def test_user_profile_invalid_token(client: AsyncClient):
+    async with client as ac:
+        response = await ac.post(
+            "/user/register",
+            json={'username': "test01",
+                'email': "test01@email.com",
+                'password': "some123",
+                'password2': "some123",
+                'full_name': "Test User"})
+
+        assert response.status_code == 201
+
+        response = await ac.post(
+            url='/auth/login',
+            data={
+                "username": "test01@email.com",
+                "password": "some123"
+            }
+        )
+
+        assert response.status_code == 200
+        login_data = response.json()
+        
+        response = await ac.get(
+            url='/user/profile',
+            headers={
+                "Authorization": f"Bearer lfjldfdjksl{login_data['access_token']}"
+            }
+        )
+
+        # Unauthorized (invalid authentication credentials)
+        assert response.status_code == 401

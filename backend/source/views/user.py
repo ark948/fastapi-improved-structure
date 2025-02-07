@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Body
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 from source.services.database import get_db
 from source.models import User
 from source.schemas import user as user_schemas
@@ -11,6 +12,7 @@ from source.services.authentication import AuthDep, get_current_user
 from source import utils
 from source.services.redis import submit_otp_for_user, verify_otp_for_user, RedisDep
 from source.dependencies import SessionDep
+from source.utils import myprint
 
 
 
@@ -23,20 +25,15 @@ async def test():
     return 'ok'
 
 
+# exclude_unset will remove the fields not provided by user
 
 @router.get("/get-user", response_model=user_schemas.UserBaseModel | None)
 async def get_user(id: str, db: AsyncSession = Depends(get_db)):
-    try:
-        user = await User.get(db, id)
-    except Exception as error:
-        raise HTTPException(
-            status_code=500, detail=f"There was a problem. {str(error)}"
-        )
+    user = await User.get(db, id)
     if user:
         return user
-    raise HTTPException(
-        status_code=404, detail="User not found."
-    )
+    raise HTTPException(status_code=404, detail="User not found.")
+
 
 @router.get("/get-users", response_model=list[user_schemas.UserBaseModel])
 async def get_users(db: AsyncSession = Depends(get_db)):
