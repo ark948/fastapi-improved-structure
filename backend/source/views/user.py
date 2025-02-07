@@ -1,7 +1,9 @@
-from typing import Annotated, Dict
-from fastapi import APIRouter, Depends, status, HTTPException, Body
+from typing import Annotated, Dict, Union
+from fastapi import APIRouter, Depends, status, HTTPException, Body, Request, Header
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.templating import Jinja2Templates
 
 
 from source.services.database import get_db
@@ -17,12 +19,28 @@ from source.utils import myprint
 
 
 router = APIRouter()
+templates = Jinja2Templates(directory='templates')
 
 
 
 @router.get('/test', response_model=str, status_code=200)
 async def test():
     return 'ok'
+
+
+
+@router.get('/html-test', response_class=HTMLResponse | JSONResponse)
+async def html_test(request: Request):
+    if request.headers["accept"].split(',')[0] == 'text/html':
+        print("HTML Response")
+        return templates.TemplateResponse(
+            request=request, name='test.html', context={"message": "Hello from fastapi"}
+        )
+    else:
+        print("JSON Response")
+        return JSONResponse(
+            content={"message": "hey"}
+        )
 
 
 # exclude_unset will remove the fields not provided by user
@@ -43,7 +61,6 @@ async def get_users(db: AsyncSession = Depends(get_db)):
 
 @router.post("/register", response_model=user_schemas.UserBaseModel, status_code=201)
 async def create_user(data: user_schemas.UserCreateModel, db: AsyncSession = Depends(get_db)):
-    # user = await UserModel.create(db, **user.dict()) # if not using this, id won't be created
     user = await user_crud.create_user_crud(data, db)
     return user
 

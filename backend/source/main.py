@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from source.config import settings
 from source.services.database import sessionmanager
@@ -28,6 +29,8 @@ app.include_router(user_router, prefix='/user', tags=['user'])
 from source.services.authentication import router as auth_router
 app.include_router(auth_router, prefix='/auth', tags=['auth'])
 
+
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
 @app.get('')
