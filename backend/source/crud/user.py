@@ -17,10 +17,7 @@ async def create_user_crud( payload: user_schemas.UserCreateModel, db: Session =
     try:
         new_user_dict = payload.model_dump()
         if not new_user_dict["password"] == new_user_dict["password2"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Passwords do not match."
-            )
+            raise HTTPException( status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match." )
         new_user_obj = await User.create(
             db=db,
             username=new_user_dict['username'],

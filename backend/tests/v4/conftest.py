@@ -63,10 +63,9 @@ def anyio_backend():
 
 
 @pytest.fixture(scope="session")
-async def connection(anyio_backend) -> AsyncGenerator[AsyncConnection, None]:
+async def connection( anyio_backend ) -> AsyncGenerator[AsyncConnection, None]:
     def _create_db():
         result = database_exists(engine.url)
-        # print("\n", result, "\n")
         return result
 
     async def init_models():
@@ -80,9 +79,7 @@ async def connection(anyio_backend) -> AsyncGenerator[AsyncConnection, None]:
 
         
 @pytest.fixture()
-async def transaction(
-    connection: AsyncConnection,
-) -> AsyncGenerator[AsyncTransaction, None]:
+async def transaction( connection: AsyncConnection, ) -> AsyncGenerator[AsyncTransaction, None]:
     async with connection.begin() as transaction:
         yield transaction
 
@@ -92,9 +89,7 @@ async def transaction(
 # after function exits, even if session.commit() is called
 # in inner functions
 @pytest.fixture()
-async def session(
-    connection: AsyncConnection, transaction: AsyncTransaction
-) -> AsyncGenerator[AsyncSession, None]:
+async def session( connection: AsyncConnection, transaction: AsyncTransaction ) -> AsyncGenerator[AsyncSession, None]:
     async_session = AsyncSession(
         bind=connection,
         join_transaction_mode="create_savepoint",
@@ -132,7 +127,9 @@ async def client( connection: AsyncConnection, transaction: AsyncTransaction, re
     # get_async_session
     app.dependency_overrides[get_db] = override_get_async_session
     app.dependency_overrides[get_redis] = override_get_redis
-    yield AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+    yield AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        )
     del app.dependency_overrides[get_db]
 
     await transaction.rollback()

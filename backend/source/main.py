@@ -29,6 +29,11 @@ app.include_router(user_router, prefix='/user', tags=['user'])
 from source.services.authentication import router as auth_router
 app.include_router(auth_router, prefix='/auth', tags=['auth'])
 
+from source.apps.accounts.views import acc_router
+from source.apps.accounts.views import pages_router
+app.include_router(acc_router, prefix='/accounts')
+app.include_router(pages_router, prefix='/pages')
+
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 

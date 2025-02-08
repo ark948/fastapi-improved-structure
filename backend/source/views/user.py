@@ -31,20 +31,24 @@ async def test():
 
 @router.get('/html-test', response_class=HTMLResponse | JSONResponse)
 async def html_test(request: Request):
+    
     if request.headers["accept"].split(',')[0] == 'text/html':
         print("HTML Response")
         return templates.TemplateResponse(
             request=request, name='test.html', context={"message": "Hello from fastapi"}
         )
+    elif request.headers["accept"].split(',')[0] == 'text/json':    
+            print("JSON Response")
+            return JSONResponse(
+                content={"message": "hey"}
+            )
     else:
-        print("JSON Response")
-        return JSONResponse(
-            content={"message": "hey"}
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to render response."
         )
 
-
 # exclude_unset will remove the fields not provided by user
-
 @router.get("/get-user", response_model=user_schemas.UserBaseModel | None)
 async def get_user(id: str, db: AsyncSession = Depends(get_db)):
     user = await User.get(db, id)

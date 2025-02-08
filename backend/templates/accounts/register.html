@@ -1,0 +1,24 @@
+{% extends "_base.html" %}
+
+
+
+{% block content %}
+    <h2>Register page</h2>
+
+    <form hx-post="/accounts/register">
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" required>
+        <label for="password2">Repeat Password</label>
+        <input type="password" name="password2">
+        <label for="full_name">Full Name:</label>
+        <input type="text" name="full_name">
+        <button type="submit">Register</button>
+    </form>
+    {% if message %}
+        <h4>{{ message }}</h4>
+    {% endif %}
+{% endblock content %}
