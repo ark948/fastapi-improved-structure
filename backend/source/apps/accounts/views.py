@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, Union
+from typing import Annotated, Dict, Union, Optional
 from fastapi import APIRouter, Depends, status, HTTPException, Body, Request, Header, Form
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -34,7 +34,7 @@ async def register(
         email: str = Form(...),
         password: str = Form(...),
         password2: str = Form(...),
-        full_name: str = Form(...)
+        full_name: Optional[str] = Form(...) | None
     ):
     if password != password2:
          return HTMLResponse(content="<p>Passwords do not match.</p>", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)

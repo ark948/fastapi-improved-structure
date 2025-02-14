@@ -37,3 +37,9 @@ class UserCreateModel(BaseModel):
     password: str
     password2: str
     full_name: Optional[str] = None
+
+
+class UserUpdateModel(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: Optional[str] = None

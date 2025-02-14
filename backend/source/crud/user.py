@@ -1,4 +1,6 @@
 from fastapi import Depends, HTTPException, status  
+from typing import Dict, Any
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError  
 from sqlalchemy.orm import Session
 import hashlib, uuid
@@ -7,9 +9,11 @@ import hashlib, uuid
 
 from source.models import User
 from source.schemas import user as user_schemas
+from source.schemas.user import UserBaseModel, UserCreateModel, UserUpdateModel
 from source.services.database import get_db
 from source.services.authentication import hash_plain_password
 from source.dependencies import SessionDep
+from .base import CRUDBase
 
 
 
@@ -81,3 +85,23 @@ async def activate_user_crud( user: User, db: SessionDep ):
             detail=f"An error occurred while creating the property: {str(e)}",  
         )
     
+
+
+class CRUDUser(CRUDBase[User, UserCreateModel, UserUpdateModel]):
+    async def get( self, db: AsyncSession, obj_id: str) -> User:
+        return await super().get(db, obj_id)
+    
+    async def get_or_create(self, db: AsyncSession, defaults: Dict[str, Any] | None, **kwargs: Any) ->  User:
+        return await super().get_or_create(db, defaults, **kwargs)
+    
+    # async def get_multi(self, db: AsyncSession, *, skip: int = 0, limit: int = 20) -> Page[Product]:
+    #     return await super().get_multi(db, skip=skip, limit=limit)
+
+    async def update(self, db: AsyncSession, *, obj_current: User, obj_new: UserUpdateModel | Dict[str, Any] | User):
+        return await super().update(db, obj_current=obj_current, obj_new=obj_new)
+
+    async def remove(self, db: AsyncSession, *, obj_id: str) -> User | None:
+        return await super().remove(db, obj_id=obj_id)
+    
+
+user_crud = CRUDUser(User)
