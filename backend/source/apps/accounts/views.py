@@ -34,11 +34,11 @@ async def register(
         email: str = Form(...),
         password: str = Form(...),
         password2: str = Form(...),
-        full_name: Optional[str] = Form(...) | None
+        # full_name: Optional[str] = Form(...) | None
     ):
     if password != password2:
          return HTMLResponse(content="<p>Passwords do not match.</p>", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-    payload = schemas.UserCreateModel(username=username, email=email, password=password, password2=password2, full_name=full_name)
+    payload = schemas.UserCreateModel(username=username, email=email, password=password, password2=password2)
     try:
         resposne = await user_crud.create_user_crud(payload, db)
         if resposne:

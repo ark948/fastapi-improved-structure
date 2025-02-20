@@ -3,6 +3,7 @@ from typing import Dict, Any
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError  
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 import hashlib, uuid
 
 
@@ -14,6 +15,38 @@ from source.services.database import get_db
 from source.services.authentication import hash_plain_password
 from source.dependencies import SessionDep
 from .base import CRUDBase
+
+
+
+
+async def create_user_with_role( obj_in: UserCreateModel, db: SessionDep ):
+    db_obj = await User.create(
+        db=db,
+        email = obj_in.email,
+        username = obj_in.username,
+        full_name = obj_in.full_name,
+        password_hash = hash_plain_password(obj_in.password),
+        is_active = False
+    )
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+    return db_obj
+
+
+
+async def is_user_active(user: User) -> bool:
+    return user.is_active
+
+
+
+async def crud_user_get_by_email(email: str, session: SessionDep):
+    user = (await session.execute(
+        select(User).where(User.email == email)
+    )).scalar()
+    if not user:
+        return None
+    return user
 
 
 

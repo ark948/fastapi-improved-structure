@@ -28,24 +28,14 @@ async def test():
     return 'ok'
 
 
-
-@router.get('/html-test', response_class=HTMLResponse | JSONResponse)
+# DO NOT USER Union in resposne_class
+@router.get('/html-test')
 async def html_test(request: Request):
-    
     if request.headers["accept"].split(',')[0] == 'text/html':
-        print("HTML Response")
-        return templates.TemplateResponse(
-            request=request, name='test.html', context={"message": "Hello from fastapi"}
-        )
-    elif request.headers["accept"].split(',')[0] == 'text/json':    
-            print("JSON Response")
-            return JSONResponse(
-                content={"message": "hey"}
-            )
+        return templates.TemplateResponse( request=request, name='test.html', context={'message': "Hello from HTML"} )
     else:
-        raise HTTPException(
-            status_code=500,
-            detail="Unable to render response."
+        return JSONResponse(
+            content={"message": "JSON resposne"}
         )
 
 # exclude_unset will remove the fields not provided by user

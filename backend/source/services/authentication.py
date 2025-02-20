@@ -48,7 +48,7 @@ async def get_user_from_email(email: str, session: SessionDep) -> User:
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="User with this email was not found.",
         )
     return user
     

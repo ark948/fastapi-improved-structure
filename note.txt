@@ -35,3 +35,14 @@ role-based authorization
 docker run -p 6379:6379 -it redis/redis-stack
 
 This will run redis/redis-stack image, port 6379 will be exposed, and in interactive mode
+
+
+
+
+
+following modules are related to role feature:
+routers (as opposed to views)
+constants
+some classes in schemas (such as roles and users)
+routers folder moved to api (so to have endpoints.py)
+note that we will be utilizing oauth2 scopes, these scopes represent permissions

@@ -34,6 +34,9 @@ from source.apps.accounts.views import pages_router
 app.include_router(acc_router, prefix='/accounts')
 app.include_router(pages_router, prefix='/pages')
 
+from source.api.routers.user import router as new_user_router
+app.include_router(new_user_router, prefix='/new-users', tags=['new_users'])
+
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 

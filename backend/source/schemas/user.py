@@ -1,10 +1,12 @@
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, UUID4
 from typing import List, Optional
 from enum import Enum 
+from datetime import datetime
 
 
 
 from source.models import User
+from source.schemas.user_role import UserRole
 
 
 class Status(Enum):  
@@ -43,3 +45,32 @@ class UserUpdateModel(BaseModel):
     username: str
     email: EmailStr
     full_name: Optional[str] = None
+
+
+
+# new stuff after adding role
+class UserBase(BaseModel):
+    username: str
+    email: Optional[EmailStr] = None
+    is_active: Optional[bool] = True
+    full_name: Optional[str] = None
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+
+class UserInDBBase(UserBase):
+    id: UUID4
+    user_role: Optional[UserRole] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+class User(UserInDBBase):
+    pass
