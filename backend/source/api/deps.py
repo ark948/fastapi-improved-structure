@@ -6,11 +6,12 @@ from jose import jwt
 
 
 from source.constants.role import Role
-from source.crud.user import is_user_active
+from source.crud.user import is_user_active, get_user_by_id_with_role
 from source.models import User
 from source.services.database import get_db
 from source.config import settings
 from source.schemas.token import TokenPayload
+from source.dependencies import SessionDep
 
 
 
@@ -21,6 +22,7 @@ ALGORITHM = "HS256"
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"/auth/access-token",
     scopes={
+        # guest
         Role.GUEST["name"]: Role.GUEST["description"],
         Role.ACCOUNT_ADMIN["name"]: Role.ACCOUNT_ADMIN["description"],
         Role.ACCOUNT_MANAGER["name"]: Role.ACCOUNT_MANAGER["description"],
@@ -30,9 +32,9 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-
+# This does check for user role
 async def get_current_user( 
-        security_scopes: SecurityScopes, db: AsyncSession = Depends(get_db), token: str = Depends(reusable_oauth2),
+        security_scopes: SecurityScopes, db: SessionDep, token: str = Depends(reusable_oauth2),
     ) -> User:
     if security_scopes.scopes:
         authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
@@ -54,7 +56,8 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = User.get(db, id=token_data.id)
+    # user = await User.get(db, id=token_data.id)
+    user = await get_user_by_id_with_role( id=token_data.id, db=db )
     if not user:
         raise credentials_exception
     if security_scopes.scopes and not token_data.role:

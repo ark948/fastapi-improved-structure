@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from source.schemas.user import UserCreate, User as SchemaUser, UserBaseModel
+from source.schemas.user import UserCreate, User as SchemaUser, UserBaseModel, UserUpdate
 # from source import crud, models, schemas
 from source.api import deps
 from source.constants.role import Role
@@ -20,6 +20,7 @@ from source.dependencies import SessionDep
 from source.models import User
 from source.crud.user import crud_user_get_by_email
 from source.utils import myprint
+from source.crud.user import user_crud
 
 
 
@@ -27,9 +28,25 @@ from source.utils import myprint
 router = APIRouter()
 
 
+@router.get("", response_model=List[SchemaUser])
+async def read_users(
+    db: AsyncSession = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Security(
+        deps.get_current_active_user,
+        scopes=[Role.ADMIN["name"], Role.SUPER_ADMIN["name"]],
+    ),
+) -> Any:
+    """
+    Retrieve all users.
+    """
+    users = await user_crud.get_multi(db, skip=skip, limit=limit,)
+    return users
+
+
 
 # bare asterisk means the all parameters after asterisk must be keyword params
-
 @router.post("/create", response_model=SchemaUser)
 async def create_user(
     *,
@@ -74,3 +91,45 @@ async def create_user_open(
     user_in = UserCreate( password=password, email=email, full_name=full_name, username=username )
     user = await create_user_with_role(obj_in=user_in, db=db)
     return user
+
+
+
+@router.put("/{user_id}", response_model=SchemaUser)
+async def update_user(
+    *,
+    db: SessionDep,
+    user_id: UUID4,
+    user_in: UserUpdate,
+    current_user: User = Security(
+        deps.get_current_active_user,
+        scopes=[Role.ADMIN["name"], Role.SUPER_ADMIN["name"]],
+    ),
+) -> Any:
+    """
+    Update a user.
+    """
+    user = await user_crud.get(db, obj_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user with this username does not exist in the system",
+        )
+    user = await user_crud.update(db, obj_current=user, obj_new=user_in)
+    return user
+
+
+
+# this route demonstrates checking for required permissions (or role)
+@router.get('/profile', response_model=UserBaseModel)
+async def profile(
+    *,
+    db: SessionDep,
+    current_user: User = Security(
+        deps.get_current_active_user,
+        scopes=[
+            Role.ADMIN["name"], 
+            Role.SUPER_ADMIN["name"]
+        ],
+    )
+) -> Any:
+    return current_user

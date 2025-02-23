@@ -46,3 +46,8 @@ constants
 some classes in schemas (such as roles and users)
 routers folder moved to api (so to have endpoints.py)
 note that we will be utilizing oauth2 scopes, these scopes represent permissions
+secuity.py
+
+role checking works (by oauth2 scopes)
+now attempting to combine the two approach (oauth2 scopes and RoleChecker dependency)
+role_checker

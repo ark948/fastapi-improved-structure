@@ -62,10 +62,10 @@ class UserCreate(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: UUID4
+    id: UUID4 | str
     user_role: Optional[UserRole] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(
         from_attributes=True
@@ -73,4 +73,9 @@ class UserInDBBase(UserBase):
 
 
 class User(UserInDBBase):
+    pass
+
+
+
+class UserUpdate(UserBase):
     pass

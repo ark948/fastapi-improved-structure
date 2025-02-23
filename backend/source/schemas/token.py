@@ -7,6 +7,6 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    id: UUID4
+    id: UUID4 | str
     role: str = None
-    account_id: UUID4 = None
+    # account_id: UUID4 = None

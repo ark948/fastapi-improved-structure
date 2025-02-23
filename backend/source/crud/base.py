@@ -51,6 +51,15 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 query = query.where(getattr(self.model, key) == value)
         result = await db.execute(query)
         return result.scalar_one_or_none()
+    
+
+    async def create(self, db: AsyncSession, *, obj_in: CreateSchemaType) -> ModelType:
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = self.model(**obj_in_data)  # type: ignore
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
 
 
     async def get_or_create( self, db: AsyncSession, defaults: Optional[Dict[str, Any]], **kwargs: Any ) -> ModelType:

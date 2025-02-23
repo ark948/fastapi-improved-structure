@@ -12,4 +12,4 @@ def generate_otp() -> str:
 
 def myprint(*args):
     for i in args:
-        print("\n\n", i, "\n\n")
+        print("\n", i, "\n")

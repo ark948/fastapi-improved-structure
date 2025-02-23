@@ -26,16 +26,17 @@ app = FastAPI(
 from source.views.user import router as user_router
 app.include_router(user_router, prefix='/user', tags=['user'])
 
-from source.services.authentication import router as auth_router
-app.include_router(auth_router, prefix='/auth', tags=['auth'])
+# from source.services.authentication import router as auth_router
+# app.include_router(auth_router, prefix='/auth', tags=['auth'])
 
 from source.apps.accounts.views import acc_router
 from source.apps.accounts.views import pages_router
 app.include_router(acc_router, prefix='/accounts')
 app.include_router(pages_router, prefix='/pages')
 
-from source.api.routers.user import router as new_user_router
-app.include_router(new_user_router, prefix='/new-users', tags=['new_users'])
+
+from source.api.endpoints import api_router
+app.include_router(api_router, prefix='/api')
 
 
 app.mount('/static', StaticFiles(directory='static'), name='static')

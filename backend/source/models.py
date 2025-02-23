@@ -44,7 +44,6 @@ class User(Base):
     async def create(cls, db: AsyncSession, id=None, **kwargs):
         if not id:
             id = uuid4().hex
-
         transaction = cls(id=id, **kwargs)
         db.add(transaction)
         await db.commit()
