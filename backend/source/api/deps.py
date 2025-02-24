@@ -1,6 +1,7 @@
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from fastapi import Depends, HTTPException, status, Security
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from typing import Annotated, Union
 from pydantic import ValidationError
 from jose import jwt
 
@@ -28,6 +29,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
         Role.ACCOUNT_MANAGER["name"]: Role.ACCOUNT_MANAGER["description"],
         Role.ADMIN["name"]: Role.ADMIN["description"],
         Role.SUPER_ADMIN["name"]: Role.SUPER_ADMIN["description"],
+        Role.CUSTOMER["name"]: Role.CUSTOMER["description"]
     },
 )
 
@@ -75,7 +77,13 @@ async def get_current_user(
 
 
 
-def get_current_active_user( current_user: User = Security(get_current_user, scopes=[], ), ) -> User:
-    if not is_user_active(current_user):
+async def get_current_active_user( current_user: User = Security(get_current_user, scopes=[], ), ) -> User:
+    if not await is_user_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+CurrentActiveUserDep = Annotated[User, Depends(get_current_active_user)]

@@ -51,3 +51,5 @@ secuity.py
 role checking works (by oauth2 scopes)
 now attempting to combine the two approach (oauth2 scopes and RoleChecker dependency)
 role_checker
+
+user03 has customer role

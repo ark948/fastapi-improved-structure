@@ -24,3 +24,7 @@ class Role:
         "name": "SUPER_ADMIN",
         "description": "Super Administrator of Application Ecosystem",
     }
+    CUSTOMER = {
+        "name": "customer",
+        "description": "Registered customer"
+    }
