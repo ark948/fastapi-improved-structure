@@ -14,7 +14,7 @@ from source.dependencies import SessionDep
 
 
 
-router = APIRouter(prefix="/roles", tags=["roles"])
+router = APIRouter()
 
 
 @router.get("/", response_model=List[role_schemas.Role])

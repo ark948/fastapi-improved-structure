@@ -1,6 +1,9 @@
 from uuid import uuid4
 from enum import Enum as PythonEnum
-from sqlalchemy import Column, String, select, Boolean, Enum, Text, ForeignKey, UniqueConstraint
+import datetime
+from datetime import datetime
+from datetime import timezone
+from sqlalchemy import Column, String, select, Boolean, Enum, Text, ForeignKey, UniqueConstraint, DateTime
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import UUID
@@ -38,6 +41,8 @@ class User(Base):
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=False, nullable=True)
     user_role = relationship("UserRole", back_populates="user", uselist=False)
+    # created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    # updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc),)
 
 
     @classmethod
