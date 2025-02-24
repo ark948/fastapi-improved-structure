@@ -56,7 +56,6 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    # user = await User.get(db, id=token_data.id)
     user = await get_user_by_id_with_role( id=token_data.id, db=db )
     if not user:
         raise credentials_exception

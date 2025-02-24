@@ -7,7 +7,7 @@ from pydantic import UUID4, BaseModel, ConfigDict
 # Shared properties
 class UserRoleBase(BaseModel):
     user_id: Optional[UUID4] | str
-    role_id: Optional[UUID4]
+    role_id: Optional[UUID4] | str
 
 
 # Properties to receive via API on creation

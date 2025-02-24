@@ -72,6 +72,23 @@ class UserInDBBase(UserBase):
     )
 
 
+class RoleInline(BaseModel):
+    id: UUID4 | str
+    name: str
+
+class UserRoleInline(BaseModel):
+    user_id: UUID4 | str
+    role_id: UUID4 | str
+
+class UserWithRole(BaseModel):
+    id: UUID4 | str
+    username: str
+    email: Optional[EmailStr] = None
+    is_active: Optional[bool] = None
+    full_name: Optional[str] = None
+    user_role: Optional[UserRoleInline] = None
+
+
 class User(UserInDBBase):
     pass
 

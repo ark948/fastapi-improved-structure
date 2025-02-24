@@ -18,7 +18,7 @@ from source.services.database import get_db
 router = APIRouter()
 
 
-@router.post("", response_model=user_role_schemas.UserRole)
+@router.post("", response_model=user_role_schemas.UserRoleBase)
 async def assign_user_role(
     *,
     db: AsyncSession = Depends(get_db),
@@ -28,7 +28,7 @@ async def assign_user_role(
     """
     Assign a role to a user after creation of a user
     """
-    user_role = await user_role_crud.user_role.get_by_user_id(db, user_id=user_role_in.user_id)
+    user_role = await user_role_crud.user_role.get_user_role_by_user_id( db, user_id=user_role_in.user_id )
     if user_role:
         raise HTTPException(
             status_code=409,

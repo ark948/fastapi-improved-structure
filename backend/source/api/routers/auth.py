@@ -2,7 +2,8 @@ from datetime import timedelta
 from typing import Any
 
 from source.crud import user as crud
-from source.models import User
+from source.models import User, Role
+from source.schemas import user as user_schemas
 from source.schemas.user import User as SchemaUser
 from source.schemas.token import Token, TokenPayload
 from source.api import deps
@@ -44,10 +45,10 @@ async def login_access_token(
     if not user.user_role:
         role = "GUEST"
     else:
-        role = user.user_role.role.name
+        role = await db.get(Role, user.user_role.role_id)
     token_payload = {
         "id": user.id,
-        "role": role,
+        "role": role.name,
     }
     return {
         "access_token": security.create_access_token(
@@ -76,11 +77,23 @@ async def hash_password(password: str = Body(..., embed=True),) -> Any:
     return security.get_password_hash(password)
 
 
-@router.get("/test-token", response_model=SchemaUser)
+@router.get("/test-token")
 async def test_token_get(
+    db: SessionDep,
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Test access token
     """
-    return current_user
+    role = await db.get(Role, current_user.user_role.role_id)
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "role": {
+            "id": current_user.user_role.role_id,
+            "name": role.name
+        }
+    }
