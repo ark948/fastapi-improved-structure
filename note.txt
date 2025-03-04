@@ -28,7 +28,7 @@ notable features to implement:
 user account verification using otp and redis
 secret key rotation
 rate-limiting
-role-based authorization
+role-based authorization (done)
 
 
 - to run redis docker image on port 6379:

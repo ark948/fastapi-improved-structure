@@ -3,8 +3,8 @@ import datetime
 from sqlalchemy import desc, or_
 from sqlalchemy.exc import IntegrityError, NoResultFound, MultipleResultsFound
 
-from source.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from src.config import SessionLocal
+from source.services.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from source.services.database import async_sessionmaker
 
 
 class BaseManager:
