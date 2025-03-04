@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from source.config import settings
 from source.services.database import sessionmanager
+from source.services.rate import limiter, _rate_limit_exceeded_handler
 
 
 @asynccontextmanager
@@ -21,6 +23,24 @@ app = FastAPI(
     title="FastAPI server",
     lifespan=lifespan
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(429, _rate_limit_exceeded_handler)
+
+
+
+@app.get('/test-rate-limit')
+@limiter.limit("5/minute")
+async def test_rate_limit(request: Request):
+    return PlainTextResponse("This route is rate limited.")
+
+
+
+@app.get('/test-rate-limit02')
+@limiter.limit('10/minute', key_func=lambda request: request.state.user_role)
+async def test_rate_limit02(request: Request):
+    return Response({"message": f"This endpoint is rate limited to 10 requests per minute based on user roles"})
+
 
 
 from source.views.user import router as user_router
